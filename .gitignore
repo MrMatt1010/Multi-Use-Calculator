@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+ENV/
+.env/
+.venv/
+
+# Kivy build artifacts
+*.log
+*.tmp
+
+# IDE / Editor files
+.vscode/
+*.swp
+*.swo
+*.swn
+.DS_Store
+Thumbs.db
+
+# Buildozer and Android packaging
+buildozer.spec
+.gradle/
+*.apk
+*.aab
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore the Python environment lock or local config files
+pip-wheel-metadata/
+.python-version
+
