@@ -108,5 +108,4 @@ class CalculatorApp(App):
 
 # Standard Python idiom to run the app when the script is executed directly
 if __name__ == "__main__":
-    CalculatorApp().run()</content>
-<parameter name="filePath">g:\Code\Multi Use Calculator\main.py
+    CalculatorApp().run()
