@@ -1,65 +1,64 @@
 # Import necessary modules from Kivy for building the GUI application
 from kivy.app import App
-from kivy.core.window import Window
-from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
-
-class NeonButton(Button):
-    pass
-
-class NeonTextInput(TextInput):
-    pass
 
 # Define the main application class that inherits from Kivy's App class
 class CalculatorApp(App):
     # The build method is called automatically by Kivy to create the UI
     def build(self):
-        Builder.load_file("interface.kv")
-        Window.clearcolor = (0.02, 0.03, 0.08, 1)
-
+        # List of arithmetic operators used in the calculator
         self.operators = ["/", "*", "+", "-"]
+        # Track if the last button pressed was an operator
         self.last_was_operator = None
+        # Track the text of the last button pressed
         self.last_button = None
 
+        # Create the main vertical layout for the calculator
         main_layout = BoxLayout(orientation="vertical")
-
-        self.solution = NeonTextInput(
-            multiline=False,
-            readonly=True,
-            halign="right",
-            font_size=55,
-            text="",
+        # Create a text input widget to display the current expression and results
+        # It's read-only, right-aligned, and has a large font size
+        self.solution = TextInput(
+            multiline=False, readonly=True, halign="right", font_size=55
         )
+        # Add the text input to the main layout
         main_layout.add_widget(self.solution)
-
+        # Define the button layout in a 4x4 grid (excluding the equals button)
         buttons = [
             ["7", "8", "9", "/"],
             ["4", "5", "6", "*"],
             ["1", "2", "3", "-"],
             [".", "0", "C", "+"],
         ]
-
+        # Loop through each row of buttons
         for row in buttons:
-            h_layout = BoxLayout(spacing=10)
+            # Create a horizontal layout for each row
+            h_layout = BoxLayout()
+            # Loop through each button label in the row
             for label in row:
-                button = NeonButton(
+                # Create a button with the label text
+                button = Button(
                     text=label,
                     pos_hint={"center_x": 0.5, "center_y": 0.5},
                 )
+                # Bind the button's on_press event to the on_button_press method
                 button.bind(on_press=self.on_button_press)
+                # Add the button to the horizontal layout
                 h_layout.add_widget(button)
+            # Add the horizontal layout (row) to the main layout
             main_layout.add_widget(h_layout)
 
-        equals_button = NeonButton(
-            text="=",
-            pos_hint={"center_x": 0.5, "center_y": 0.5},
-            size_hint_y=0.95,
+        # Create the equals button separately
+        equals_button = Button(
+            text="=", pos_hint={"center_x": 0.5, "center_y": 0.5}
         )
+        # Bind the equals button to the on_solution method
         equals_button.bind(on_press=self.on_solution)
+        # Add the equals button to the main layout
         main_layout.add_widget(equals_button)
 
+        # Return the main layout as the root widget of the app
         return main_layout
 
     # Method called when any button (except equals) is pressed
@@ -109,4 +108,5 @@ class CalculatorApp(App):
 
 # Standard Python idiom to run the app when the script is executed directly
 if __name__ == "__main__":
-    CalculatorApp().run()
+    CalculatorApp().run()</content>
+<parameter name="filePath">g:\Code\Multi Use Calculator\main.py
