@@ -1,0 +1,56 @@
+#:import rgba kivy.utils.get_color_from_hex
+
+<NeonButton@Button>:
+    background_normal: ''
+    font_size: '34sp'
+    color: 0.94, 0.98, 1, 1
+    background_color: rgba('#0a1e33')
+    border: (16, 16, 16, 16)
+    size_hint: 1, 1
+    canvas.before:
+        Color:
+            rgba: (0.05, 0.35, 0.72, 1) if self.text in ['/', '*', '+', '-', '='] else (0.08, 0.16, 0.26, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [22, ]
+        Color:
+            rgba: (0.18, 0.78, 1, 0.18)
+        RoundedRectangle:
+            pos: self.x + 2, self.y + 2
+            size: self.width - 4, self.height - 4
+            radius: [20, ]
+
+<NeonTextInput@TextInput>:
+    foreground_color: 0.92, 0.98, 1, 1
+    background_color: 0.04, 0.08, 0.12, 1
+    padding: 26, 22, 26, 22
+    cursor_color: 0.4, 0.9, 1, 1
+    readonly: True
+    font_size: '62sp'
+    halign: 'right'
+    valign: 'middle'
+    multiline: False
+    canvas.before:
+        Color:
+            rgba: 0.06, 0.12, 0.2, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [24, ]
+
+<BoxLayout>:
+    spacing: 10
+    padding: 14
+    canvas.before:
+        Color:
+            rgba: 0.03, 0.04, 0.08, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<TextInput>:
+    background_normal: ''
+
+<Button>:
+    background_down: ''
