@@ -1,9 +1,10 @@
 import os
 import math
 from kivy.app import App
+from kivy.core.window import Window
 from kivy.lang import Builder
+from kivy.properties import BooleanProperty
 from kivy.uix.boxlayout import BoxLayout
-Builder.load_file(os.path.join(os.path.dirname(__file__), 'interface.kv'))
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
@@ -36,6 +37,24 @@ def safe_eval(expression, x=None):
         return None
 
 
+class HoverBehavior:
+    hovered = BooleanProperty(False)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Window.bind(mouse_pos=self.on_mouse_pos)
+
+    def on_mouse_pos(self, window, pos):
+        if not self.get_root_window():
+            return
+        inside = self.collide_point(*self.to_widget(*pos))
+        self.hovered = inside
+
+
+class HoverButton(HoverBehavior, Button):
+    pass
+
+
 class GraphWidget(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -49,19 +68,31 @@ class GraphWidget(Widget):
     def redraw(self, *args):
         self.canvas.clear()
         with self.canvas:
-            Color(0.06, 0.12, 0.2, 1)
+            Color(0.04, 0.08, 0.16, 1)
             Rectangle(pos=self.pos, size=self.size)
-            Color(0.6, 0.6, 0.6, 1)
+            Color(0.08, 0.14, 0.25, 1)
+            Rectangle(pos=self.pos, size=(self.width, self.height * 0.35))
+
             center_x = self.x + self.width / 2
             center_y = self.y + self.height / 2
-            Line(points=[self.x, center_y, self.right, center_y], width=1)
-            Line(points=[center_x, self.y, center_x, self.top], width=1)
+            grid_color = (0.22, 0.32, 0.45, 1)
+            Color(*grid_color)
+            steps = 10
+            for i in range(steps + 1):
+                x = self.x + i * self.width / steps
+                y = self.y + i * self.height / steps
+                Line(points=[x, self.y, x, self.top], width=0.7)
+                Line(points=[self.x, y, self.right, y], width=0.7)
+
+            Color(0.55, 0.7, 0.92, 1)
+            Line(points=[self.x, center_y, self.right, center_y], width=1.4)
+            Line(points=[center_x, self.y, center_x, self.top], width=1.4)
 
             if not self.expression:
                 return
 
             points = []
-            samples = 240
+            samples = 280
             x_range = 10.0
             y_limit = 10.0
             prev_point = None
@@ -79,49 +110,46 @@ class GraphWidget(Widget):
                 prev_point = (gx, gy)
 
             if points:
-                Color(0.18, 0.78, 1, 1)
-                Line(points=points, width=2)
+                Color(0.15, 0.80, 1, 1)
+                Line(points=points, width=3, cap='round', joint='round')
+
+
 
 
 class CalculatorApp(App):
     def build(self):
+        kv_path = os.path.join(os.path.dirname(__file__), 'interface.kv')
+        if os.path.abspath(kv_path) in Builder.files:
+            Builder.unload_file(os.path.abspath(kv_path))
+        root = Builder.load_file(kv_path)
+
         self.operators = ['/', '*', '+', '-']
         self.last_was_operator = False
         self.last_button = None
-        self.mode_buttons = {}
+        self.current_mode = 'Normal'
 
-        root = BoxLayout(orientation='vertical')
-        mode_bar = BoxLayout(size_hint_y=None, height=48)
-        for mode in ['Normal', 'Scientific', 'Graphical']:
-            button = Button(text=mode)
-            button.bind(on_press=self.on_mode_switch)
-            self.mode_buttons[mode] = button
-            mode_bar.add_widget(button)
-        root.add_widget(mode_bar)
+        self.normal_display = root.ids.normal_display
+        self.scientific_display = root.ids.scientific_display
+        self.graph_input = root.ids.graph_input
+        self.graph_widget = root.ids.graph_widget
+        self.screen_manager = root.ids.screen_manager
 
-        self.screen_manager = ScreenManager()
-        self.normal_screen = Screen(name='Normal')
-        self.scientific_screen = Screen(name='Scientific')
-        self.graph_screen = Screen(name='Graphical')
+        self.mode_buttons = {
+            'Normal': root.ids.btn_normal,
+            'Scientific': root.ids.btn_scientific,
+            'Graphical': root.ids.btn_graphical,
+        }
 
-        self.setup_normal_screen()
-        self.setup_scientific_screen()
-        self.setup_graph_screen()
-
-        self.screen_manager.add_widget(self.normal_screen)
-        self.screen_manager.add_widget(self.scientific_screen)
-        self.screen_manager.add_widget(self.graph_screen)
-
-        root.add_widget(self.screen_manager)
         self.switch_mode('Normal')
         return root
 
-    def on_mode_switch(self, instance):
-        self.switch_mode(instance.text)
+    def on_mode_switch(self, mode):
+        self.switch_mode(mode)
 
     def switch_mode(self, mode):
-        self.screen_manager.current = mode
         self.current_mode = mode
+        self.screen_manager.current = mode
+
         if mode == 'Normal':
             self.solution = self.normal_display
         elif mode == 'Scientific':
@@ -130,74 +158,12 @@ class CalculatorApp(App):
             self.solution = self.graph_input
 
         for name, button in self.mode_buttons.items():
-            button.background_color = (0.14, 0.18, 0.28, 1) if name == mode else (0.08, 0.10, 0.16, 1)
-
-    def setup_normal_screen(self):
-        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
-        self.normal_display = TextInput(multiline=False, readonly=True, halign='right', font_size=48)
-        layout.add_widget(self.normal_display)
-
-        button_grid = GridLayout(cols=4, spacing=10, size_hint_y=None)
-        button_grid.bind(minimum_height=button_grid.setter('height'))
-        buttons = [
-            '7', '8', '9', '/',
-            '4', '5', '6', '*',
-            '1', '2', '3', '-',
-            '.', '0', 'C', '+',
-        ]
-        for label in buttons:
-            button = Button(text=label)
-            button.bind(on_press=self.on_button_press)
-            button_grid.add_widget(button)
-        layout.add_widget(button_grid)
-
-        equals_button = Button(text='=', size_hint_y=None, height=60)
-        equals_button.bind(on_press=self.on_solution)
-        layout.add_widget(equals_button)
-
-        self.normal_screen.add_widget(layout)
-
-    def setup_scientific_screen(self):
-        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
-        self.scientific_display = TextInput(multiline=False, readonly=True, halign='right', font_size=48)
-        layout.add_widget(self.scientific_display)
-
-        button_grid = GridLayout(cols=5, spacing=10, size_hint_y=None)
-        button_grid.bind(minimum_height=button_grid.setter('height'))
-        buttons = [
-            'sin', 'cos', 'tan', 'log', 'sqrt',
-            '(', ')', '^', 'C', 'ANS',
-            '7', '8', '9', '/',
-            '4', '5', '6', '*',
-            '1', '2', '3', '-',
-            '.', '0', '00', '+',
-        ]
-        for label in buttons:
-            button = Button(text=label)
-            button.bind(on_press=self.on_scientific_button_press)
-            button_grid.add_widget(button)
-        layout.add_widget(button_grid)
-
-        equals_button = Button(text='=', size_hint_y=None, height=60)
-        equals_button.bind(on_press=self.on_solution)
-        layout.add_widget(equals_button)
-
-        self.scientific_screen.add_widget(layout)
-
-    def setup_graph_screen(self):
-        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
-        input_row = BoxLayout(size_hint_y=None, height=60, spacing=10)
-        input_row.add_widget(Label(text='f(x)=', size_hint_x=None, width=70, color=(0.94, 0.98, 1, 1)))
-        self.graph_input = TextInput(multiline=False, halign='left', font_size=32)
-        plot_button = Button(text='Plot', size_hint_x=None, width=100)
-        plot_button.bind(on_press=self.on_graph_plot)
-        input_row.add_widget(self.graph_input)
-        input_row.add_widget(plot_button)
-        layout.add_widget(input_row)
-
-        self.graph_widget = GraphWidget()
-        layout.add_widget(self.graph_widget)
-        self.graph_screen.add_widget(layout)
+            if name == mode:
+                button.background_color = (0.06, 0.45, 0.92, 1)
+                button.color = (1, 1, 1, 1)
+            else:
+                button.background_color = (0.08, 0.10, 0.16, 1)
+                button.color = (0.94, 0.98, 1, 1)
 
     def on_button_press(self, instance):
         current = self.solution.text
@@ -209,10 +175,9 @@ class CalculatorApp(App):
                 return
             if current == '' and button_text in self.operators:
                 return
-            new_text = current + button_text
-            self.solution.text = new_text
+            self.solution.text = current + button_text
         self.last_button = button_text
-        self.last_was_operator = self.last_button in self.operators
+        self.last_was_operator = button_text in self.operators
 
     def on_scientific_button_press(self, instance):
         label = instance.text

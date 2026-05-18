@@ -1,56 +1,311 @@
 #:import rgba kivy.utils.get_color_from_hex
 
-<NeonButton@Button>:
-    background_normal: ''
-    font_size: '34sp'
-    color: 0.94, 0.98, 1, 1
-    background_color: rgba('#0a1e33')
-    border: (16, 16, 16, 16)
-    size_hint: 1, 1
+<HoverButton>:
     canvas.before:
         Color:
-            rgba: (0.05, 0.35, 0.72, 1) if self.text in ['/', '*', '+', '-', '='] else (0.08, 0.16, 0.26, 1)
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [22, ]
-        Color:
-            rgba: (0.18, 0.78, 1, 0.18)
-        RoundedRectangle:
-            pos: self.x + 2, self.y + 2
-            size: self.width - 4, self.height - 4
-            radius: [20, ]
-
-<NeonTextInput@TextInput>:
-    foreground_color: 0.92, 0.98, 1, 1
-    background_color: 0.04, 0.08, 0.12, 1
-    padding: 26, 22, 26, 22
-    cursor_color: 0.4, 0.9, 1, 1
-    readonly: True
-    font_size: '62sp'
-    halign: 'right'
-    valign: 'middle'
-    multiline: False
-    canvas.before:
-        Color:
-            rgba: 0.06, 0.12, 0.2, 1
-        RoundedRectangle:
-            pos: self.pos
-            size: self.size
-            radius: [24, ]
-
-<BoxLayout>:
-    spacing: 10
-    padding: 14
-    canvas.before:
-        Color:
-            rgba: 0.03, 0.04, 0.08, 1
+            rgba: (0, 0, 0, 0)
         Rectangle:
             pos: self.pos
             size: self.size
 
+<NeonButton@HoverButton>:
+    background_normal: ''
+    font_size: '24sp'
+    color: 0.94, 0.98, 1, 1
+    background_color: rgba('#0a1e33')
+    border: (16, 16, 16, 16)
+    size_hint: 1, None
+    height: '64dp'
+    canvas.before:
+        Color:
+            rgba: self.background_color if not self.hovered else (0.08, 0.24, 0.46, 1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [20, ]
+        Color:
+            rgba: (0.18, 0.78, 1, 0.18) if self.hovered else (0, 0, 0, 0)
+        RoundedRectangle:
+            pos: self.x + 2, self.y + 2
+            size: self.width - 4, self.height - 4
+            radius: [18, ]
+    canvas.after:
+        Color:
+            rgba: (0.3, 0.75, 1, 0.45) if self.state == 'down' else (0, 0, 0, 0)
+        Line:
+            width: 2
+            rounded_rectangle: (self.x + 2, self.y + 2, self.width - 4, self.height - 4, 18)
+
+<NeonTextInput@TextInput>:
+    background_color: (0.06, 0.12, 0.2, 1)
+    foreground_color: 0.94, 0.98, 1, 1
+    padding: 18, 16, 18, 16
+    cursor_color: 0.4, 0.9, 1, 1
+    readonly: True
+    font_size: '40sp'
+    halign: 'right'
+    valign: 'middle'
+    multiline: False
+
+BoxLayout:
+    orientation: 'vertical'
+    padding: 12
+    spacing: 12
+    canvas.before:
+        Color:
+            rgba: 0.03, 0.05, 0.10, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        size_hint_y: None
+        height: '52dp'
+        spacing: 8
+        NeonButton:
+            id: btn_normal
+            text: 'Normal'
+            on_press: app.switch_mode('Normal')
+        NeonButton:
+            id: btn_scientific
+            text: 'Scientific'
+            on_press: app.switch_mode('Scientific')
+        NeonButton:
+            id: btn_graphical
+            text: 'Graphical'
+            on_press: app.switch_mode('Graphical')
+
+    ScreenManager:
+        id: screen_manager
+
+        Screen:
+            name: 'Normal'
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 10
+                NeonTextInput:
+                    id: normal_display
+                    readonly: True
+                    font_size: '48sp'
+                    size_hint_y: None
+                    height: '80dp'
+                GridLayout:
+                    cols: 4
+                    spacing: 10
+                    size_hint_y: None
+                    height: self.minimum_height
+                    row_force_default: True
+                    row_default_height: '64dp'
+                    NeonButton:
+                        text: '7'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '8'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '9'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '/'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '4'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '5'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '6'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '*'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '1'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '2'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '3'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '-'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '.'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '0'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: 'C'
+                        on_press: app.on_button_press(self)
+                    NeonButton:
+                        text: '+'
+                        on_press: app.on_button_press(self)
+                NeonButton:
+                    text: '='
+                    size_hint_y: None
+                    height: '56dp'
+                    on_press: app.on_solution(self)
+
+        Screen:
+            name: 'Scientific'
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 10
+                NeonTextInput:
+                    id: scientific_display
+                    readonly: True
+                    font_size: '44sp'
+                    size_hint_y: None
+                    height: '80dp'
+                GridLayout:
+                    cols: 5
+                    spacing: 10
+                    size_hint_y: None
+                    height: self.minimum_height
+                    row_force_default: True
+                    row_default_height: '64dp'
+                    NeonButton:
+                        text: 'sin'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'cos'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'tan'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'log'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'sqrt'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '('
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: ')'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '^'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'C'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'ANS'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '7'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '8'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '9'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '/'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '%'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '4'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '5'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '6'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '*'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'pi'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '1'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '2'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '3'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '-'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: 'e'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '.'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '0'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '00'
+                        on_press: app.on_scientific_button_press(self)
+                    NeonButton:
+                        text: '+'
+                        on_press: app.on_scientific_button_press(self)
+                NeonButton:
+                    text: '='
+                    size_hint_y: None
+                    height: '56dp'
+                    on_press: app.on_solution(self)
+
+        Screen:
+            name: 'Graphical'
+            BoxLayout:
+                orientation: 'vertical'
+                spacing: 10
+                BoxLayout:
+                    size_hint_y: None
+                    height: '56dp'
+                    spacing: 10
+                    Label:
+                        text: 'f(x) ='
+                        size_hint_x: None
+                        width: '80dp'
+                        color: 0.94, 0.98, 1, 1
+                        bold: True
+                    TextInput:
+                        id: graph_input
+                        multiline: False
+                        halign: 'left'
+                        font_size: '32sp'
+                        size_hint_y: None
+                        height: '56dp'
+                        background_normal: ''
+                        background_color: 0.06, 0.12, 0.2, 1
+                        foreground_color: 0.94, 0.98, 1, 1
+                        padding: 18, 16, 18, 16
+                        cursor_color: 0.4, 0.9, 1, 1
+                    NeonButton:
+                        text: 'Plot'
+                        size_hint_x: None
+                        width: '100dp'
+                        on_press: app.on_graph_plot(self)
+                GraphWidget:
+                    id: graph_widget
+                    canvas.before:
+                        Color:
+                            rgba: 0.03, 0.05, 0.12, 1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
 <TextInput>:
     background_normal: ''
+    foreground_color: 0.94, 0.98, 1, 1
 
 <Button>:
     background_down: ''
+    color: 0.94, 0.98, 1, 1
