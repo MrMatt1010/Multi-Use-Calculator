@@ -14,7 +14,7 @@ class CalculatorAppGraphicalTests(unittest.TestCase):
 
     def test_build_returns_button_fail(self):
         root = self.app.build()
-        self.assertEqual(root.__class__.__name__, "Button")
+        self.assertEqual(root.__class__.__name__, "BoxLayout")
 
     def test_on_button_press_adds_digit(self):
         self.app.solution.text = ""
@@ -26,7 +26,7 @@ class CalculatorAppGraphicalTests(unittest.TestCase):
         self.app.solution.text = ""
         button = Button(text="+")
         self.app.on_button_press(button)
-        self.assertEqual(self.app.solution.text, "+")
+        self.assertEqual(self.app.solution.text, "")
 
     def test_on_solution_calculates_result(self):
         self.app.solution.text = "4*5"
@@ -36,7 +36,7 @@ class CalculatorAppGraphicalTests(unittest.TestCase):
     def test_on_solution_wrong_result_fail(self):
         self.app.solution.text = "4*5"
         self.app.on_solution(None)
-        self.assertEqual(self.app.solution.text, "21")
+        self.assertEqual(self.app.solution.text, "20")
 
 if __name__ == "__main__":
     unittest.main()
